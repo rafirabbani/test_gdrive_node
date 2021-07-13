@@ -1,7 +1,6 @@
 import express from 'express';
 import models from './models/IndexModels';
-import test from './controllers/PhotosController'
-
+import routes from './routes/IndexRoute';
 
 const app = express();
 
@@ -11,11 +10,12 @@ app.use("/hello-world", (req, res) => {
 
 //Assign Models to req.context middleware
 app.use(async (req, res, next) => {
-    req.context = {models};
+    req.context = { models };
     next();
 });
 
-test.a()
+//API Routes
+app.use('/api/photos', routes.PhotosRoute);
 
 //Catch Unauthorized Error
 app.use((err, req, res, next) => {

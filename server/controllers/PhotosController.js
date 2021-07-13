@@ -1,34 +1,29 @@
-import path from 'path'
 import googleAuth from '../auth/GoogleAuth'
-import { google } from 'googleapis'
 
-const { auth, readCredentials } = googleAuth
-const credsPath = path.join(process.cwd(), '/server/auth/secret/credentials.json' )
+const { drive } = googleAuth
 
-
-//read files metadata
-const a = () => {
-    const drive = google.drive({
-        version: 'v3',
-        auth: auth(readCredentials(credsPath)),
-    });
-    drive.files.list({
-        pageSize: 10,
-        fields: 'nextPageToken, files(id, name)',
-      }, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err);
-        const files = res.data.files;
-        if (files.length) {
-          console.log('Files:');
-          files.map((file) => {
-            console.log(`${file.name} (${file.id})`);
-          });
-        } else {
-          console.log('No files found.');
-        }
-      });
+//Get Files List from Gdrive
+const getFiles  = async (req, res) => {
+  try {
+    const result = await drive.files.list({
+      pageSize: 10,
+      fields: 'nextPageToken, files(id, name)',
+    })
+    if (result) {
+      return res.send(result.data.files)
+    }
+    else {
+      return res.status(400).send('No files found')
+    }
+  }
+  catch (err) {
+    console.error('Error', err)
+    return res.status(500).send('Something Went Wrong')
+  }
+  
+  
 }
 
 export default {
-    a
+    getFiles
 }
