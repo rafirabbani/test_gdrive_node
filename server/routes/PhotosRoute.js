@@ -4,7 +4,8 @@ import IndexControllers from '../controllers/IndexController'
 const photos = IndexControllers.PhotosController
 const router = Router()
 
-router.use('/list', photos.getFiles)
+router.get('/list', photos.getFiles)
+router.post('/upload', photos.uploadFiles)
 
 export default router
 

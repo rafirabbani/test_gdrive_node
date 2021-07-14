@@ -1,6 +1,10 @@
+import formidable from 'formidable'
+import fs from 'fs'
+import path from 'path'
 import googleAuth from '../auth/GoogleAuth'
 
 const { drive } = googleAuth
+const pathDir = path.join(process.cwd(), '/uploads/')
 
 //Get Files List from Gdrive
 const getFiles  = async (req, res) => {
@@ -24,7 +28,63 @@ const getFiles  = async (req, res) => {
 
 //Upload Files to Gdrive
 const uploadFiles = async (req, res) => {
-  //do upload function here
+  //Make Temp Upload Folder on Local Machine
+  if (!fs.existsSync(pathDir)) {
+    fs.mkdirSync(pathDir);
+  }
+
+  // Handle File Using Formidable
+  const form = formidable({
+    multiples: true,
+    keepExtensions: true,
+    uploadDir: pathDir
+  })
+  
+  form
+      .on('fileBegin', async (keyName, file) => {
+        file.path = path.join(pathDir, file.name)
+      })
+      .on('end', () => {
+        console.log('File Uploaded on Local Machine')
+      })
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(400).send('Bad Request')
+    }
+
+    //Create Meta Data and Request Body for Google Drive API
+    const fileMetaData = {
+      name: files.photos.name
+    }
+    const media = {
+      mimeType: files.photos.type,
+      body: fs.createReadStream(files.photos.path)
+    }
+
+    //Upload File from Local Machine To Google Drive
+    try {
+      const result = await drive.files.create({
+        resource: fileMetaData,
+        media: media,
+        fields: 'id'
+      })
+      if (result) {
+        //Delete file from local machine
+        fs.unlinkSync(files.photos.path)
+        return res.send('File Deleted from Local and Uploaded to Google Drive')
+      }
+      else {
+        return res.status(500).send('Upload to Google Drive Failed')
+      }
+    }
+    catch (err) {
+      console.error(err)
+      return res.status(500).send('Something Went Wrong')
+    }
+  })
+  
+  
 }
 
 export default {
