@@ -20,10 +20,14 @@ const getFiles  = async (req, res) => {
     console.error('Error', err)
     return res.status(500).send('Something Went Wrong')
   }
-  
-  
+}
+
+//Upload Files to Gdrive
+const uploadFiles = async (req, res) => {
+  //do upload function here
 }
 
 export default {
-    getFiles
+    getFiles,
+    uploadFiles
 }

@@ -22,7 +22,7 @@
     "formidable": "^1.2.2",
     "fs": "^0.0.1-security",
     "googleapis": "39",
-    "helmet": "3.22.0",
+    "helmet": "^4.6.0",
     "http": "^0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
