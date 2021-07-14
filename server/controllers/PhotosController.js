@@ -67,12 +67,12 @@ const uploadFiles = async (req, res) => {
       const result = await drive.files.create({
         resource: fileMetaData,
         media: media,
-        fields: 'id'
+        fields: 'id, name, mimeType, webContentLink'
       })
       if (result) {
         //Delete file from local machine
         fs.unlinkSync(files.photos.path)
-        return res.send('File Deleted from Local and Uploaded to Google Drive')
+        return res.send(result.data)
       }
       else {
         return res.status(500).send('Upload to Google Drive Failed')
@@ -83,11 +83,29 @@ const uploadFiles = async (req, res) => {
       return res.status(500).send('Something Went Wrong')
     }
   })
-  
-  
+}
+
+const downloadFiles = async (req, res) => {
+  try {
+    const result = await drive.files.get({
+      fileId: req.params.fileId,
+      fields: 'id, name, mimeType, webContentLink'
+    })
+    if (result) {
+      return res.send(result.data)
+    }
+    else {
+      return res.status(404).send('File Not Found')
+    }
+  }
+  catch (err) {
+    console.error(err)
+    return res.status(500).send('Something Went Wrong')
+  }
 }
 
 export default {
     getFiles,
-    uploadFiles
+    uploadFiles,
+    downloadFiles
 }
